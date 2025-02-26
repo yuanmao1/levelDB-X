@@ -36,7 +36,7 @@ std::expected<size_t, util::VarIntError> util::encodeVarInt32(std::span<uint8_t>
             return std::unexpected(VarIntError::kInsufficientBuffer);
         }
         // 取最低7位，并设置最高位（如果有更多位）
-        uint8_t byte = value & 0x7F;
+        uint8_t byte = static_cast<uint8_t>(value & 0x7F);
         value >>= 7;
         if (value != 0) {
             byte |= 0x80;
@@ -55,7 +55,7 @@ std::expected<size_t, util::VarIntError> util::encodeVarInt64(std::span<uint8_t>
             return std::unexpected(VarIntError::kInsufficientBuffer);
         }
         // 取最低7位，并设置最高位（如果有更多位）
-        uint8_t byte = value & 0x7F;
+        uint8_t byte = static_cast<uint8_t>(value & 0x7F);
         value >>= 7;
         if (value != 0) {
             byte |= 0x80;
@@ -68,35 +68,59 @@ std::expected<size_t, util::VarIntError> util::encodeVarInt64(std::span<uint8_t>
 // VarInt32 解码
 std::expected<std::pair<uint32_t, size_t>, util::VarIntError>
 util::decodeVarInt32(std::span<const uint8_t> src) noexcept {
-    uint32_t value      = 0;
+    uint32_t result     = 0;
+    size_t   shift      = 0;
     size_t   bytes_read = 0;
-    for (int shift = 0; shift < 32; shift += 7) {
+
+    while (true) {
         if (bytes_read >= src.size()) {
             return std::unexpected(VarIntError::kInvalidEncoding);
         }
+
         uint8_t byte = src[bytes_read++];
-        value |= (byte & 0x7F) << shift;
+        result |= static_cast<uint32_t>(byte & 0x7F) << shift;
+        shift += 7;
+
+        // 检查是否继续读取
         if ((byte & 0x80) == 0) {
-            return std::make_pair(value, bytes_read);
+            break; // 最高位为 0，结束解码
+        }
+
+        // 防止移位溢出（VarInt 最多 10 字节表示 64 位整数）
+        if (shift >= 32 && (byte & 0x80) != 0) {
+            return std::unexpected(VarIntError::kInvalidEncoding);
         }
     }
-    return std::unexpected(VarIntError::kInvalidEncoding);
+
+    return std::make_pair(result, bytes_read);
 }
 
 // VarInt64 解码
 std::expected<std::pair<uint64_t, size_t>, util::VarIntError>
 util::decodeVarInt64(std::span<const uint8_t> src) noexcept {
-    uint64_t value      = 0;
+    uint64_t result     = 0;
+    size_t   shift      = 0;
     size_t   bytes_read = 0;
-    for (int shift = 0; shift < 64; shift += 7) {
+
+    while (true) {
         if (bytes_read >= src.size()) {
             return std::unexpected(VarIntError::kInvalidEncoding);
         }
+
         uint8_t byte = src[bytes_read++];
-        value |= (byte & 0x7F) << shift;
+        result |= static_cast<uint64_t>(byte & 0x7F) << shift;
+        shift += 7;
+
+        // 检查是否继续读取
         if ((byte & 0x80) == 0) {
-            return std::make_pair(value, bytes_read);
+            break; // 最高位为 0，结束解码
+        }
+
+        // 防止移位溢出（VarInt 最多 10 字节表示 64 位整数）
+        if (shift >= 64 && (byte & 0x80) != 0) {
+            return std::unexpected(VarIntError::kInvalidEncoding);
         }
     }
-    return std::unexpected(VarIntError::kInvalidEncoding);
+
+    return std::make_pair(result, bytes_read);
 }
