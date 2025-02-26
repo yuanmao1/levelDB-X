@@ -32,7 +32,7 @@ std::expected<size_t, util::VarIntError> util::encodeVarInt32(std::span<uint8_t>
                                                               uint32_t           value) noexcept {
     size_t bytes_written = 0;
     do {
-        if (bytes_written >= dst.size()) {
+        if (bytes_written >= dst.size()) [[unlikely]] {
             return std::unexpected(VarIntError::kInsufficientBuffer);
         }
         // 取最低7位，并设置最高位（如果有更多位）
@@ -51,7 +51,7 @@ std::expected<size_t, util::VarIntError> util::encodeVarInt64(std::span<uint8_t>
                                                               uint64_t           value) noexcept {
     size_t bytes_written = 0;
     do {
-        if (bytes_written >= dst.size()) {
+        if (bytes_written >= dst.size()) [[unlikely]] {
             return std::unexpected(VarIntError::kInsufficientBuffer);
         }
         // 取最低7位，并设置最高位（如果有更多位）
