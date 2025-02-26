@@ -1,4 +1,5 @@
 #include <LSMTree/skipList.h>
+#include <chrono>
 #include <gtest/gtest.h>
 
 TEST(SkipList, insert) {
@@ -61,4 +62,30 @@ TEST(SkipList, find) {
     EXPECT_EQ(list.find(8), 8);
     EXPECT_EQ(list.find(9), 9);
     EXPECT_EQ(list.find(10), 10);
+}
+
+TEST(SkipList, timeCost) {
+    db::SkipList<int, int> list;
+    auto                   start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 10000000; i++) {
+        list.insert(i, i);
+    }
+    auto                          end  = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> diff = end - start;
+    std::cout << "insert 10000000 elements cost: " << diff.count() << " s" << std::endl;
+    auto receive = [](int val) {};
+    start        = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 10000000; i++) {
+        receive(list.find(i));
+    }
+    end  = std::chrono::high_resolution_clock::now();
+    diff = end - start;
+    std::cout << "find 10000000 elements cost: " << diff.count() << " s" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 10000000; i++) {
+        list.remove(i);
+    }
+    end  = std::chrono::high_resolution_clock::now();
+    diff = end - start;
+    std::cout << "remove 10000000 elements cost: " << diff.count() << " s" << std::endl;
 }
