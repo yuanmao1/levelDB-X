@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 TEST(SkipList, insert) {
-    db::SkipList<int, int> list;
+    dbx::SkipList<int, int> list;
     list.insert(1, 1);
     list.insert(2, 2);
     list.insert(3, 3);
@@ -17,7 +17,7 @@ TEST(SkipList, insert) {
 }
 
 TEST(SkipList, remove) {
-    db::SkipList<int, int> list;
+    dbx::SkipList<int, int> list;
     list.insert(1, 1);
     list.insert(2, 2);
     list.insert(3, 3);
@@ -41,7 +41,7 @@ TEST(SkipList, remove) {
 }
 
 TEST(SkipList, find) {
-    db::SkipList<int, int> list;
+    dbx::SkipList<int, int> list;
     list.insert(1, 1);
     list.insert(2, 2);
     list.insert(3, 3);
@@ -65,8 +65,8 @@ TEST(SkipList, find) {
 }
 
 TEST(SkipList, timeCost) {
-    db::SkipList<int, int> list;
-    auto                   start = std::chrono::high_resolution_clock::now();
+    dbx::SkipList<int, int> list;
+    auto                    start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 10000000; i++) {
         list.insert(i, i);
     }

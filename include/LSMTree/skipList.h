@@ -1,10 +1,12 @@
+#pragma once
+
 #ifndef __SKIP_LIST_H__
 #define __SKIP_LIST_H__
 
 #include <util/concepts.h>
-namespace db {
+namespace dbx {
 
-template<Comparable K, typename V>
+template<util::Comparable K, typename V>
 struct SkipListNode {
     int            level;
     K              key;
@@ -16,7 +18,7 @@ struct SkipListNode {
     ~SkipListNode();
 };
 
-template<Comparable K, typename V>
+template<util::Comparable K, typename V>
 class SkipList {
   public:
     SkipList();
@@ -38,6 +40,6 @@ class SkipList {
     int                 randomLevel();
     SkipListNode<K, V>* head;
 };
-} // namespace db
+} // namespace dbx
 
 #endif // __SKIP_LIST_H__
