@@ -4,64 +4,29 @@
 
 TEST(test_skipList, insert) {
     dbx::SkipList<int, int> list;
-    list.insert(1, 1);
-    list.insert(2, 2);
-    list.insert(3, 3);
-    list.insert(4, 4);
-    list.insert(5, 5);
-    list.insert(6, 6);
-    list.insert(7, 7);
-    list.insert(8, 8);
-    list.insert(9, 9);
-    list.insert(10, 10);
+    for (int i = 0; i < 10; i++) {
+        list.insert(i, i);
+    }
 }
 
 TEST(test_skipList, remove) {
     dbx::SkipList<int, int> list;
-    list.insert(1, 1);
-    list.insert(2, 2);
-    list.insert(3, 3);
-    list.insert(4, 4);
-    list.insert(5, 5);
-    list.insert(6, 6);
-    list.insert(7, 7);
-    list.insert(8, 8);
-    list.insert(9, 9);
-    list.insert(10, 10);
-    list.remove(1);
-    list.remove(2);
-    list.remove(3);
-    list.remove(4);
-    list.remove(5);
-    list.remove(6);
-    list.remove(7);
-    list.remove(8);
-    list.remove(9);
-    list.remove(10);
+    for (int i = 0; i < 10; i++) {
+        list.insert(i, i);
+    }
+    for (int i = 0; i < 10; i++) {
+        list.remove(i);
+    }
 }
 
 TEST(test_skipList, find) {
     dbx::SkipList<int, int> list;
-    list.insert(1, 1);
-    list.insert(2, 2);
-    list.insert(3, 3);
-    list.insert(4, 4);
-    list.insert(5, 5);
-    list.insert(6, 6);
-    list.insert(7, 7);
-    list.insert(8, 8);
-    list.insert(9, 9);
-    list.insert(10, 10);
-    EXPECT_EQ(list.find(1), 1);
-    EXPECT_EQ(list.find(2), 2);
-    EXPECT_EQ(list.find(3), 3);
-    EXPECT_EQ(list.find(4), 4);
-    EXPECT_EQ(list.find(5), 5);
-    EXPECT_EQ(list.find(6), 6);
-    EXPECT_EQ(list.find(7), 7);
-    EXPECT_EQ(list.find(8), 8);
-    EXPECT_EQ(list.find(9), 9);
-    EXPECT_EQ(list.find(10), 10);
+    for (int i = 0; i < 10; i++) {
+        list.insert(i, i);
+    }
+    for (int i = 0; i < 10; i++) {
+        EXPECT_EQ(list.find(i), i);
+    }
 }
 
 TEST(test_skipList, timeCost) {
@@ -72,7 +37,7 @@ TEST(test_skipList, timeCost) {
     }
     auto                          end  = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
-    std::cout << "insert 10000000 elements cost: " << diff.count() << " s" << std::endl;
+    std::cout << "insert 10000000 elements cost: " << diff.count() << " ns" << std::endl;
     auto receive = [](int val) {};
     start        = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 10000000; i++) {
@@ -80,12 +45,12 @@ TEST(test_skipList, timeCost) {
     }
     end  = std::chrono::high_resolution_clock::now();
     diff = end - start;
-    std::cout << "find 10000000 elements cost: " << diff.count() << " s" << std::endl;
+    std::cout << "find 10000000 elements cost: " << diff.count() << " ns" << std::endl;
     start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 10000000; i++) {
         list.remove(i);
     }
     end  = std::chrono::high_resolution_clock::now();
     diff = end - start;
-    std::cout << "remove 10000000 elements cost: " << diff.count() << " s" << std::endl;
+    std::cout << "remove 10000000 elements cost: " << diff.count() << " ns" << std::endl;
 }
