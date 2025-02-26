@@ -2,7 +2,7 @@
 #include <chrono>
 #include <gtest/gtest.h>
 
-TEST(SkipList, insert) {
+TEST(test_skipList, insert) {
     dbx::SkipList<int, int> list;
     list.insert(1, 1);
     list.insert(2, 2);
@@ -16,7 +16,7 @@ TEST(SkipList, insert) {
     list.insert(10, 10);
 }
 
-TEST(SkipList, remove) {
+TEST(test_skipList, remove) {
     dbx::SkipList<int, int> list;
     list.insert(1, 1);
     list.insert(2, 2);
@@ -40,7 +40,7 @@ TEST(SkipList, remove) {
     list.remove(10);
 }
 
-TEST(SkipList, find) {
+TEST(test_skipList, find) {
     dbx::SkipList<int, int> list;
     list.insert(1, 1);
     list.insert(2, 2);
@@ -64,7 +64,7 @@ TEST(SkipList, find) {
     EXPECT_EQ(list.find(10), 10);
 }
 
-TEST(SkipList, timeCost) {
+TEST(test_skipList, timeCost) {
     dbx::SkipList<int, int> list;
     auto                    start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 10000000; i++) {
