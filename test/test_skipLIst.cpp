@@ -27,6 +27,13 @@ TEST(test_skipList, find) {
     for (int i = 0; i < 10; i++) {
         EXPECT_EQ(list.find(i), i);
     }
+    list.remove(5);
+    list.remove(3);
+    for (int i = 0; i < 10; i++) {
+        if (i != 5 && i != 3) {
+            EXPECT_EQ(list.find(i), i);
+        }
+    }
 }
 
 TEST(test_skipList, timeCost) {

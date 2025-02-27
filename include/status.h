@@ -8,6 +8,10 @@
 #include <string_view>
 
 namespace dbx {
+/*
+Status is a class that represents the result of an operation. It holds a
+pointer to a state object that is shared between all Status objects with the
+*/
 class Status {
   public:
     // Create a success status.
@@ -112,7 +116,7 @@ class Status {
 };
 
 inline Status::Status(const Status& rhs) {
-    state_ = (rhs.state_ == nullptr) ? nullptr : CopyState(rhs.state_);
+    state_ = (rhs.state_ == nullptr) ? nullptr : CopyState(rhs.state_); // 深拷贝
 }
 inline Status& Status::operator=(const Status& rhs) {
     // The following condition catches both aliasing (when this == &rhs),

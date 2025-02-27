@@ -3,12 +3,12 @@
 
 dbx::Status::Status(dbx::Status::Code       code,
                     const std::string_view& msg,
-                    const std::string_view& msg2) {
+                    const std::string_view& msg2 = std::string_view()) { // msg2默认为空
     assert(code != kOk);
     const size_t len1   = msg.size();
     const size_t len2   = msg2.size();
     const size_t size   = len1 + (len2 ? (2 + len2) : 0);
-    char*        result = new char[size + 5];
+    char*        result = new char[size + 5]; // 这里的5是header
     memcpy(result, &size, sizeof(size));
     result[4] = static_cast<char>(code);
     memcpy(result + 5, msg.data(), len1);
