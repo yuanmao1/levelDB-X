@@ -8,6 +8,7 @@ add_requires("gtest", "mimalloc")
 
 target("levelDB-X")
     set_kind("static")
+    add_packages("mimalloc")
     add_files("src/**.cpp")
 
 target("levelDB-X-test")
