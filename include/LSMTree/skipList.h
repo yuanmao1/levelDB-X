@@ -74,17 +74,15 @@ dbx::SkipList<K, V>::~SkipList() {
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::printAll() const noexcept {
     std::println("length: {} maxLevel: {}", length, maxLevel);
-    SkipListNode<K, V>* curr;
     for (int i = maxLevel; i >= 0; --i) {
-        std::println("iiiiiiiiiiiiiiiiiii{}", i);
-        curr = head;
-        while (curr != NULL) {
-            std::println("level: {} key: {} value: {}", curr->level, curr->key, curr->value);
+        std::println("Level {}:", i);
+        SkipListNode<K, V>* curr = head->forward[i];
+        while (curr != nullptr) {
+            std::println("  key: {}, value: {}", curr->key, curr->value);
             curr = curr->forward[i];
         }
-        std::println();
     }
-}
+} // printAll 无bug
 
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
@@ -115,13 +113,21 @@ template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::remove(K key) noexcept {
 }
 
+// template<util::Comparable K, typename V>
+// int dbx::SkipList<K, V>::randomLevel() {
+//     int lv = 1;
+//     while ((std::rand() & 0xFFFF) < (0xFFFF >> 2))
+//         ++lv;
+//     return std::min(this->maxLevel, lv);
+// }
+
 template<util::Comparable K, typename V>
 int dbx::SkipList<K, V>::randomLevel() {
     int lv = 1;
-    while ((std::rand() & 0xFFFF) < (0xFFFF >> 2))
+    while ((rand() & 0xFFFF) < (0xFFFF >> 2))
         ++lv;
-    return std::min(this->maxLevel, lv);
-}
+    return std::min(maxLevel, lv); // 正确截断
+} // randomLevel 无bug
 
 // 哨兵永远是最小的
 template<util::Comparable K, typename V>
@@ -153,9 +159,17 @@ dbx::SkipListNode<K, V>::~SkipListNode() {
     }
 }
 
+// template<util::Comparable K, typename V>
+// void dbx::SkipListNode<K, V>::setNxt(int l, SkipListNode* n) {
+//     if (forward[l] == NULL || l > level) {
+//         return;
+//     }
+//     forward[l] = n;
+// }
+
 template<util::Comparable K, typename V>
 void dbx::SkipListNode<K, V>::setNxt(int l, SkipListNode* n) {
-    if (forward[l] == NULL || l > level) {
+    if (forward == NULL || l > level) { // 确保不越界
         return;
     }
     forward[l] = n;

@@ -1,4 +1,5 @@
 #include <LSMTree/skipList.h>
+#include <cstdlib>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <print>
@@ -6,7 +7,7 @@
 void n_test() {
     dbx::SkipList<int, int> list;
     for (int i = 5; i > 0; i--) {
-        list.insert(i, i);
+        list.insert(rand() % 100, i);
         std::println("insert ----------");
         list.printAll();
     }
