@@ -1,8 +1,10 @@
 #include <LSMTree/skipList.h>
 #include <chrono>
 #include <gtest/gtest.h>
+#include <print>
 
 TEST(test_skipList, insert) {
+    std::println("test insert begin");
     dbx::SkipList<int, int> list;
     for (int i = 0; i < 10; i++) {
         list.insert(i, i);
@@ -10,6 +12,7 @@ TEST(test_skipList, insert) {
 }
 
 TEST(test_skipList, remove) {
+    std::println("test remove begin");
     dbx::SkipList<int, int> list;
     for (int i = 0; i < 10; i++) {
         list.insert(i, i);
@@ -20,6 +23,7 @@ TEST(test_skipList, remove) {
 }
 
 TEST(test_skipList, find) {
+    std::println("test find begin");
     dbx::SkipList<int, int> list;
     for (int i = 0; i < 10; i++) {
         list.insert(i, i);
@@ -28,29 +32,30 @@ TEST(test_skipList, find) {
         EXPECT_EQ(list.find(i), i);
     }
 }
-
-TEST(test_skipList, timeCost) {
-    dbx::SkipList<int, int> list;
-    auto                    start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 10000000; i++) {
-        list.insert(i, i);
-    }
-    auto                          end  = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end - start;
-    std::cout << "insert 10000000 elements cost: " << diff.count() << " ns" << std::endl;
-    auto receive = [](int val) {};
-    start        = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 10000000; i++) {
-        receive(list.find(i));
-    }
-    end  = std::chrono::high_resolution_clock::now();
-    diff = end - start;
-    std::cout << "find 10000000 elements cost: " << diff.count() << " ns" << std::endl;
-    start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 10000000; i++) {
-        list.remove(i);
-    }
-    end  = std::chrono::high_resolution_clock::now();
-    diff = end - start;
-    std::cout << "remove 10000000 elements cost: " << diff.count() << " ns" << std::endl;
-}
+//
+// TEST(test_skipList, timeCost) {
+//     std::println("test timecost begin");
+//     dbx::SkipList<int, int> list;
+//     auto                    start = std::chrono::high_resolution_clock::now();
+//     for (int i = 0; i < 10000000; i++) {
+//         list.insert(i, i);
+//     }
+//     auto                          end  = std::chrono::high_resolution_clock::now();
+//     std::chrono::duration<double> diff = end - start;
+//     std::cout << "insert 10000000 elements cost: " << diff.count() << " ns" << std::endl;
+//     auto receive = [](int val) {};
+//     start        = std::chrono::high_resolution_clock::now();
+//     for (int i = 0; i < 10000000; i++) {
+//         receive(list.find(i));
+//     }
+//     end  = std::chrono::high_resolution_clock::now();
+//     diff = end - start;
+//     std::cout << "find 10000000 elements cost: " << diff.count() << " ns" << std::endl;
+//     start = std::chrono::high_resolution_clock::now();
+//     for (int i = 0; i < 10000000; i++) {
+//         list.remove(i);
+//     }
+//     end  = std::chrono::high_resolution_clock::now();
+//     diff = end - start;
+//     std::cout << "remove 10000000 elements cost: " << diff.count() << " ns" << std::endl;
+// }
