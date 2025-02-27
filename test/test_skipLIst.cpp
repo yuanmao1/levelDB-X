@@ -1,5 +1,5 @@
 #include <LSMTree/skipList.h>
-#include <chrono>
+#include <benchmark/benchmark.h>
 #include <gtest/gtest.h>
 
 TEST(test_skipList, insert) {
@@ -36,28 +36,16 @@ TEST(test_skipList, find) {
     }
 }
 
-TEST(test_skipList, timeCost) {
+static void BM_insert(benchmark::State& state) {
     dbx::SkipList<int, int> list;
-    auto                    start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 10000000; i++) {
-        list.insert(i, i);
+    auto                    receive = [](int) -> void {};
+    for (auto _ : state) {
+        for (int i = 0; i < state.range(0); i++) {
+            list.insert(i, i);
+        }
+        for (int i = 0; i < state.range(0); i++) {
+            receive(list.find(i));
+        }
     }
-    auto                          end  = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end - start;
-    std::cout << "insert 10000000 elements cost: " << diff.count() << " ns" << std::endl;
-    auto receive = [](int val) {};
-    start        = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 10000000; i++) {
-        receive(list.find(i));
-    }
-    end  = std::chrono::high_resolution_clock::now();
-    diff = end - start;
-    std::cout << "find 10000000 elements cost: " << diff.count() << " ns" << std::endl;
-    start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 10000000; i++) {
-        list.remove(i);
-    }
-    end  = std::chrono::high_resolution_clock::now();
-    diff = end - start;
-    std::cout << "remove 10000000 elements cost: " << diff.count() << " ns" << std::endl;
 }
+BENCHMARK(BM_insert)->Range(8, 8 << 10);
