@@ -3,7 +3,6 @@
 #ifndef __SKIP_LIST_H__
 #define __SKIP_LIST_H__
 
-#include <algorithm>
 #include <cstdlib>
 #include <random>
 #include <util/concepts.h>
@@ -33,6 +32,7 @@ class SkipList {
 
     [[nodiscard]]
     V find(K key) const noexcept;
+
     struct iterator {
         using iterator_category = std::forward_iterator_tag;
         using difference_type   = std::ptrdiff_t;
@@ -41,8 +41,7 @@ class SkipList {
         using pointer           = SkipListNode<K, V>**;
 
         SkipListNode<K, V>* item = nullptr;
-        explicit iterator(SkipListNode<K, V>* item) noexcept : item(item) {
-        }
+        explicit iterator(SkipListNode<K, V>* item) noexcept : item(item) {}
 
         [[nodiscard]]
         auto operator*() const noexcept -> SkipListNode<K, V>* {
@@ -57,9 +56,16 @@ class SkipList {
         }
 
         auto operator++() noexcept -> iterator& {
+            if (item) {
+                item = item->forward[0];
+            }
+            return *this;
         }
 
         auto operator++(int) noexcept -> iterator {
+            iterator tmp = *this;
+            ++(*this);
+            return tmp;
         }
 
         auto operator==(const iterator&) const noexcept -> bool = default;
@@ -81,7 +87,17 @@ class SkipList {
 
 namespace util = dbx::util;
 
-template<dbx::util::Comparable K, typename V>
+template<util::Comparable K, typename V>
+auto dbx::SkipList<K, V>::begin() const noexcept {
+    return iterator(head->forward[0]);
+}
+
+template<util::Comparable K, typename V>
+auto dbx::SkipList<K, V>::end() const noexcept {
+    return iterator(nullptr);
+}
+
+template<util::Comparable K, typename V>
 dbx::SkipList<K, V>::SkipList() {
     length = 0;
     // 头节点为哨兵节点
@@ -100,7 +116,6 @@ dbx::SkipList<K, V>::~SkipList() {
 
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
-    // std::println("insert key: {} value: {} called", key, value);
     SkipListNode<K, V>** update = new SkipListNode<K, V>*[maxLevel + 1];
     SkipListNode<K, V>*  curr   = head;
     for (int i = maxLevel; i >= 0; --i) {
@@ -156,21 +171,17 @@ void dbx::SkipList<K, V>::remove(K key) noexcept {
 
 template<util::Comparable K, typename V>
 auto dbx::SkipList<K, V>::find(K key) const noexcept -> V {
-    // SkipListNode<K, V>** update = new SkipListNode<K, V>*[maxLevel + 1];
     SkipListNode<K, V>* curr = head;
     for (int i = maxLevel; i >= 0; --i) {
         while (curr->forward[i] != NULL && compare(curr->forward[i], key) < 0) {
             curr = curr->forward[i];
         }
-        // update[i] = curr;
     }
     curr = curr->forward[0];
     if (curr != NULL && curr->key == key) {
-        // delete[] update;
         return curr->value;
     }
 
-    // delete[] update;
     return V();
 }
 
@@ -180,7 +191,7 @@ uint8_t dbx::SkipList<K, V>::randomLevel() const {
     static std::mt19937                    gen(rd());
     static std::uniform_int_distribution<> dis(0, 0xFFFF);
 
-    int lv = 1;
+    uint8_t lv = 1;
     while (dis(gen) < (0xFFFF >> 2) && lv < maxLevel) {
         ++lv;
     }
@@ -194,8 +205,6 @@ int dbx::SkipList<K, V>::compare(SkipListNode<K, V>* node, K k) const {
         return -1;
     return node->key < k ? -1 : (node->key > k ? 1 : 0);
 }
-
-// skip list node
 
 template<util::Comparable K, typename V>
 dbx::SkipListNode<K, V>::SkipListNode(K k, V v, int l) : key(k), value(v), level(l) {

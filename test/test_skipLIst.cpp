@@ -36,7 +36,7 @@ TEST(test_skipList, find) {
     }
 }
 
-static void BM_insert(benchmark::State& state) {
+static void BM_insertAndFind(benchmark::State& state) {
     dbx::SkipList<int, int> list;
     auto                    receive = [](int) -> void {};
     for (auto _ : state) {
@@ -48,4 +48,19 @@ static void BM_insert(benchmark::State& state) {
         }
     }
 }
-BENCHMARK(BM_insert)->Range(8, 8 << 10);
+
+static void BM_insertAndRemove(benchmark::State& state) {
+    dbx::SkipList<int, int> list;
+    auto                    receive = [](int) -> void {};
+    for (auto _ : state) {
+        for (int i = 0; i < state.range(0); i++) {
+            list.insert(i, i);
+        }
+        for (int i = 0; i < state.range(0); i++) {
+            list.remove(i);
+        }
+    }
+}
+
+BENCHMARK(BM_insertAndFind)->Range(8, 8 << 10);
+BENCHMARK(BM_insertAndRemove)->Range(8, 8 << 10);

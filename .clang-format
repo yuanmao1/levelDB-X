@@ -6,7 +6,7 @@ TabWidth: 4
 UseTab: Never
 ColumnLimit: 100
 AccessModifierOffset: -2
-AllowShortFunctionsOnASingleLine: None    # 禁止短函数放在一行
+AllowShortFunctionsOnASingleLine: Inline  # 允许短函数放在一行
 BreakBeforeBraces: Custom                 # 自定义大括号换行
 AlignConsecutiveAssignments: true         # 对齐连续赋值
 AlignConsecutiveDeclarations: true        # 对齐连续声明
@@ -22,6 +22,9 @@ SpacesInParentheses: false                # 括号不加空格
 SpacesInSquareBrackets: false             # 方括号不加空格
 BinPackParameters: false                  # 禁止将函数参数打包到一行
 AlwaysBreakTemplateDeclarations: Yes      # 强制模板声明单独一行
+AllowShortLambdasOnASingleLine: All       # 允许短lambda放在一行
+AllowShortBlocksOnASingleLine: Always     # 允许短块放在一行
+AllowShortCaseLabelsOnASingleLine: true   # 允许短case标签放在一行
 BraceWrapping:
   AfterEnum: false                        # 枚举的左大括号不单独一行
   AfterFunction: false                    # 函数体的左大括号不单独一行
@@ -34,6 +37,6 @@ BraceWrapping:
   BeforeCatch: false                      # catch 前的大括号不单独一行
   BeforeElse: false                       # else 前的大括号不单独一行
   IndentBraces: false                     # 不对大括号额外缩进
-  SplitEmptyFunction: true                # 空函数体的大括号单独一行
-  SplitEmptyRecord: true                  # 空类/结构体的大括号单独一行
-  SplitEmptyNamespace: true               # 空命名空间的大括号单独一行
+  SplitEmptyFunction: false               # 空函数体的大括号不单独一行
+  SplitEmptyRecord: false                 # 空类/结构体的大括号不单独一行
+  SplitEmptyNamespace: false              # 空命名空间的大括号不单独一行
