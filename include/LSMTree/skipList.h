@@ -33,12 +33,16 @@ class SkipList {
 
     [[nodiscard]]
     V find(K key) const noexcept;
-    struct Iterator {}; // TODO: Implement iterator
+    struct Iterator; // TODO: Implement iterator
 
+    //[[nodiscard]]
+    // auto begin() const noexcept;
+    //[[nodiscard]]
+    // auto end() const noexcept;
     [[nodiscard]]
-    auto begin() const noexcept;
+    Iterator begin() const noexcept;
     [[nodiscard]]
-    auto end() const noexcept;
+    Iterator end() const noexcept;
 
     void printAll() const noexcept;
 
@@ -52,6 +56,76 @@ class SkipList {
 } // namespace dbx
 
 namespace util = dbx::util;
+
+template<util::Comparable K, typename V>
+struct dbx::SkipList<K, V>::Iterator {
+    SkipListNode<K, V>* current;
+
+    Iterator(SkipListNode<K, V>* node = nullptr);
+    Iterator&               operator++();
+    Iterator                operator++(int);
+    std::pair<const K&, V&> operator*() const;
+    SkipListNode<K, V>*     operator->() const;
+    bool                    operator==(const Iterator& other) const;
+    bool                    operator!=(const Iterator& other) const;
+};
+
+// 迭代器构造函数
+template<util::Comparable K, typename V>
+dbx::SkipList<K, V>::Iterator::Iterator(SkipListNode<K, V>* node) : current(node) {
+}
+
+// 前置++运算符
+template<util::Comparable K, typename V>
+typename dbx::SkipList<K, V>::Iterator& dbx::SkipList<K, V>::Iterator::operator++() {
+    if (current)
+        current = current->forward[0];
+    return *this;
+}
+
+// 后置++运算符
+template<util::Comparable K, typename V>
+typename dbx::SkipList<K, V>::Iterator dbx::SkipList<K, V>::Iterator::operator++(int) {
+    Iterator tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+// 解引用运算符
+template<util::Comparable K, typename V>
+std::pair<const K&, V&> dbx::SkipList<K, V>::Iterator::operator*() const {
+    return {current->key, current->value};
+}
+
+// 成员访问运算符
+template<util::Comparable K, typename V>
+dbx::SkipListNode<K, V>* dbx::SkipList<K, V>::Iterator::operator->() const {
+    return current;
+}
+
+// 相等运算符
+template<util::Comparable K, typename V>
+bool dbx::SkipList<K, V>::Iterator::operator==(const Iterator& other) const {
+    return current == other.current;
+}
+
+// 不等运算符
+template<util::Comparable K, typename V>
+bool dbx::SkipList<K, V>::Iterator::operator!=(const Iterator& other) const {
+    return current != other.current;
+}
+
+// begin()实现
+template<util::Comparable K, typename V>
+auto dbx::SkipList<K, V>::begin() const noexcept -> typename SkipList<K, V>::Iterator {
+    return Iterator(head->forward[0]);
+}
+
+// end()实现
+template<util::Comparable K, typename V>
+auto dbx::SkipList<K, V>::end() const noexcept -> typename SkipList<K, V>::Iterator {
+    return Iterator(nullptr);
+}
 
 template<dbx::util::Comparable K, typename V>
 dbx::SkipList<K, V>::SkipList() {
