@@ -17,10 +17,10 @@ struct SkipListNode {
     // 设置下一个节点
     void setNxt(int l, SkipListNode* n);
 
-    const int      level;
+    const int      level; // 节点最高层
     const K        key;
     V              value;
-    SkipListNode** forward;
+    SkipListNode** forward; // 记录各层的下一个节点
 };
 
 template<util::Comparable K, typename V>
@@ -86,9 +86,9 @@ void dbx::SkipList<K, V>::printAll() const noexcept {
 
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
-    std::println("insert key: {} value: {} called", key, value);
-    SkipListNode<K, V>* update[maxLevel + 1];
-    SkipListNode<K, V>* curr = head;
+    // std::println("insert key: {} value: {} called", key, value);
+    SkipListNode<K, V>** update = new SkipListNode<K, V>*[maxLevel + 1];
+    SkipListNode<K, V>*  curr   = head;
     for (int i = maxLevel; i >= 0; --i) {
         while (curr->forward[i] != NULL && compare(curr->forward[i], key) < 0) {
             curr = curr->forward[i];
@@ -98,6 +98,7 @@ void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
     curr = curr->forward[0];
     if (curr != NULL && curr->key == key) {
         curr->value = value;
+        delete[] update;
         return;
     }
     const int level = randomLevel();
@@ -107,15 +108,56 @@ void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
         update[i]->setNxt(i, curr);
     }
     ++length;
+    delete[] update;
 }
 
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::remove(K key) noexcept {
+    SkipListNode<K, V>** update = new SkipListNode<K, V>*[maxLevel + 1];
+    SkipListNode<K, V>*  curr   = head;
+    for (int i = maxLevel; i >= 0; --i) {
+        while (curr->forward[i] != NULL && compare(curr->forward[i], key) < 0) {
+            curr = curr->forward[i];
+        }
+        update[i] = curr;
+    }
+    curr = curr->forward[0];
+
+    if (curr == NULL || curr->key != key) {
+        delete[] update;
+        return;
+    }
+
+    for (int i = 0; i <= curr->level; ++i) {
+        if (update[i]->forward[i] != curr) {
+            break;
+        }
+        update[i]->setNxt(i, curr->forward[i]);
+    }
+    delete curr;
+    --length;
+
+    delete[] update;
 }
 
 template<util::Comparable K, typename V>
 auto dbx::SkipList<K, V>::find(K key) const noexcept -> V {
-    return key;
+    // SkipListNode<K, V>** update = new SkipListNode<K, V>*[maxLevel + 1];
+    SkipListNode<K, V>* curr = head;
+    for (int i = maxLevel; i >= 0; --i) {
+        while (curr->forward[i] != NULL && compare(curr->forward[i], key) < 0) {
+            curr = curr->forward[i];
+        }
+        // update[i] = curr;
+    }
+    curr = curr->forward[0];
+    if (curr != NULL && curr->key == key) {
+        // delete[] update;
+        return curr->value;
+    }
+
+    // delete[] update;
+    return V();
 }
 
 template<util::Comparable K, typename V>
