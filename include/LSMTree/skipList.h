@@ -82,7 +82,7 @@ void dbx::SkipList<K, V>::printAll() const noexcept {
             curr = curr->forward[i];
         }
     }
-} // printAll 无bug
+}
 
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
@@ -113,21 +113,18 @@ template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::remove(K key) noexcept {
 }
 
-// template<util::Comparable K, typename V>
-// int dbx::SkipList<K, V>::randomLevel() {
-//     int lv = 1;
-//     while ((std::rand() & 0xFFFF) < (0xFFFF >> 2))
-//         ++lv;
-//     return std::min(this->maxLevel, lv);
-// }
+template<util::Comparable K, typename V>
+auto dbx::SkipList<K, V>::find(K key) const noexcept -> V {
+    return key;
+}
 
 template<util::Comparable K, typename V>
 int dbx::SkipList<K, V>::randomLevel() {
     int lv = 1;
     while ((rand() & 0xFFFF) < (0xFFFF >> 2))
         ++lv;
-    return std::min(maxLevel, lv); // 正确截断
-} // randomLevel 无bug
+    return std::min(maxLevel, lv);
+}
 
 // 哨兵永远是最小的
 template<util::Comparable K, typename V>
@@ -135,11 +132,6 @@ int dbx::SkipList<K, V>::compare(SkipListNode<K, V>* node, K k) const {
     if (node == head)
         return -1;
     return node->key < k ? -1 : (node->key > k ? 1 : 0);
-}
-
-template<util::Comparable K, typename V>
-auto dbx::SkipList<K, V>::find(K key) const noexcept -> V {
-    return key;
 }
 
 // skip list node
@@ -159,14 +151,6 @@ dbx::SkipListNode<K, V>::~SkipListNode() {
     }
 }
 
-// template<util::Comparable K, typename V>
-// void dbx::SkipListNode<K, V>::setNxt(int l, SkipListNode* n) {
-//     if (forward[l] == NULL || l > level) {
-//         return;
-//     }
-//     forward[l] = n;
-// }
-
 template<util::Comparable K, typename V>
 void dbx::SkipListNode<K, V>::setNxt(int l, SkipListNode* n) {
     if (forward == NULL || l > level) { // 确保不越界
@@ -175,4 +159,4 @@ void dbx::SkipListNode<K, V>::setNxt(int l, SkipListNode* n) {
     forward[l] = n;
 }
 
-#endif // __SKIP_LIST_H__ 为什么有问题
+#endif // __SKIP_LIST_H__
