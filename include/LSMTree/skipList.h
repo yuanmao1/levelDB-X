@@ -4,6 +4,7 @@
 #define __SKIP_LIST_H__
 
 #include <cstdlib>
+#include <mimalloc.h>
 #include <random>
 #include <util/concepts.h>
 
@@ -27,6 +28,10 @@ class SkipList {
   public:
     SkipList();
     ~SkipList();
+
+    SkipList(const SkipList&)            = delete;
+    SkipList& operator=(const SkipList&) = delete;
+
     void insert(K key, V value) noexcept;
     void remove(K key) noexcept;
 
@@ -77,11 +82,12 @@ class SkipList {
     auto end() const noexcept;
 
   private:
-    uint32_t                 length;
+    uint32_t length;
+    uint8_t  randomLevel() const;
+    int      compare(SkipListNode<K, V>* node, K k) const;
+
     constexpr static uint8_t maxLevel = 32;
-    uint8_t                  randomLevel() const;
     SkipListNode<K, V>*      head;
-    int                      compare(SkipListNode<K, V>* node, K k) const;
 };
 } // namespace dbx
 
@@ -93,6 +99,7 @@ auto dbx::SkipList<K, V>::begin() const noexcept {
 }
 
 template<util::Comparable K, typename V>
+
 auto dbx::SkipList<K, V>::end() const noexcept {
     return iterator(nullptr);
 }
@@ -101,23 +108,29 @@ template<util::Comparable K, typename V>
 dbx::SkipList<K, V>::SkipList() {
     length = 0;
     // 头节点为哨兵节点
-    head = new SkipListNode<K, V>(K(), V(), maxLevel);
+    head = static_cast<SkipListNode<K, V>*>(mi_malloc(sizeof(SkipListNode<K, V>)));
+    if (head == nullptr) {
+        throw std::bad_alloc();
+    }
+    new (head) SkipListNode<K, V>(K(), V(), maxLevel);
 }
 
 template<util::Comparable K, typename V>
 dbx::SkipList<K, V>::~SkipList() {
     // 删除所有节点
-    while (head != NULL) {
+    while (head != nullptr) {
         SkipListNode<K, V>* temp = head;
         head                     = head->forward[0];
-        delete temp;
+        temp->~SkipListNode(); // 显式调用析构函数
+        mi_free(temp);
     }
 }
 
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
-    SkipListNode<K, V>** update = new SkipListNode<K, V>*[maxLevel + 1];
-    SkipListNode<K, V>*  curr   = head;
+    SkipListNode<K, V>** update =
+        static_cast<SkipListNode<K, V>**>(mi_malloc((maxLevel + 1) * sizeof(SkipListNode<K, V>*)));
+    SkipListNode<K, V>* curr = head;
     for (int i = maxLevel; i >= 0; --i) {
         while (curr->forward[i] != NULL && compare(curr->forward[i], key) < 0) {
             curr = curr->forward[i];
@@ -127,23 +140,29 @@ void dbx::SkipList<K, V>::insert(K key, V value) noexcept {
     curr = curr->forward[0];
     if (curr != NULL && curr->key == key) {
         curr->value = value;
-        delete[] update;
+        mi_free(update);
         return;
     }
     const int level = randomLevel();
-    curr            = new SkipListNode<K, V>(key, value, level);
+    curr            = static_cast<SkipListNode<K, V>*>(mi_malloc(sizeof(SkipListNode<K, V>)));
+    if (curr == nullptr) {
+        mi_free(update);
+        return;
+    }
+    new (curr) SkipListNode<K, V>(key, value, level);
     for (int i = 0; i <= level; ++i) {
         curr->setNxt(i, update[i]->forward[i]);
         update[i]->setNxt(i, curr);
     }
     ++length;
-    delete[] update;
+    mi_free(update);
 }
 
 template<util::Comparable K, typename V>
 void dbx::SkipList<K, V>::remove(K key) noexcept {
-    SkipListNode<K, V>** update = new SkipListNode<K, V>*[maxLevel + 1];
-    SkipListNode<K, V>*  curr   = head;
+    SkipListNode<K, V>** update =
+        static_cast<SkipListNode<K, V>**>(mi_malloc((maxLevel + 1) * sizeof(SkipListNode<K, V>*)));
+    SkipListNode<K, V>* curr = head;
     for (int i = maxLevel; i >= 0; --i) {
         while (curr->forward[i] != NULL && compare(curr->forward[i], key) < 0) {
             curr = curr->forward[i];
@@ -153,7 +172,7 @@ void dbx::SkipList<K, V>::remove(K key) noexcept {
     curr = curr->forward[0];
 
     if (curr == NULL || curr->key != key) {
-        delete[] update;
+        mi_free(update);
         return;
     }
 
@@ -163,10 +182,11 @@ void dbx::SkipList<K, V>::remove(K key) noexcept {
         }
         update[i]->setNxt(i, curr->forward[i]);
     }
-    delete curr;
+    curr->~SkipListNode();
+    mi_free(curr);
     --length;
 
-    delete[] update;
+    mi_free(update);
 }
 
 template<util::Comparable K, typename V>
@@ -208,7 +228,10 @@ int dbx::SkipList<K, V>::compare(SkipListNode<K, V>* node, K k) const {
 
 template<util::Comparable K, typename V>
 dbx::SkipListNode<K, V>::SkipListNode(K k, V v, int l) : key(k), value(v), level(l) {
-    this->forward = new SkipListNode*[l + 1];
+    this->forward = static_cast<SkipListNode**>(mi_malloc((l + 1) * sizeof(SkipListNode*)));
+    if (this->forward == nullptr) {
+        throw std::bad_alloc();
+    }
     for (int i = 0; i <= l; ++i) {
         forward[i] = NULL;
     }
@@ -217,7 +240,7 @@ dbx::SkipListNode<K, V>::SkipListNode(K k, V v, int l) : key(k), value(v), level
 template<util::Comparable K, typename V>
 dbx::SkipListNode<K, V>::~SkipListNode() {
     if (forward != NULL) {
-        delete[] forward;
+        mi_free(forward);
     }
 }
 
